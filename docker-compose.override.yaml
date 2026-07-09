@@ -1,0 +1,23 @@
+services:
+  app:
+    volumes:
+      - .:/var/www
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+    # Bind-mounted host files won't be owned by the image's `appuser`, so run
+    # as root locally to avoid permission friction. Not used in production.
+    user: root
+    entrypoint: ["sh", "-c"]
+    command:
+      - >
+        composer install --no-interaction --prefer-dist &&
+        exec php-fpm -d opcache.validate_timestamps=1 -d opcache.revalidate_freq=0
+
+  web:
+    volumes:
+      - ./public:/var/www/public:ro
+
+  mysql:
+    ports:
+      - "3307:3306"
