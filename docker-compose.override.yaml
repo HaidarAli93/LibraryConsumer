@@ -1,23 +1,31 @@
+# Automatically merged on top of docker-compose.yaml by `docker compose up`.
+# Only for local development - never used in production.
+
 services:
+
   app:
     volumes:
+      # Mounts your actual project folder into the container live, so
+      # code edits on your computer show up instantly - no rebuild needed.
       - .:/var/www
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
-    # Bind-mounted host files won't be owned by the image's `appuser`, so run
-    # as root locally to avoid permission friction. Not used in production.
+    # Files from the bind-mount above belong to YOUR host user, not
+    # "appuser" - running as root here just avoids permission headaches
+    # during local dev. The base file's non-root setup is still used in
+    # production, since this override never applies there.
     user: root
-    entrypoint: ["sh", "-c"]
-    command:
-      - >
-        composer install --no-interaction --prefer-dist &&
-        exec php-fpm -d opcache.validate_timestamps=1 -d opcache.revalidate_freq=0
 
   web:
     volumes:
+      # Also mount public/ live so static file edits show up instantly.
       - ./public:/var/www/public:ro
 
   mysql:
     ports:
+      # Exposes MySQL to your computer on port 3307 (not the usual 3306,
+      # to avoid clashing with any MySQL you might already have
+      # installed locally). Lets you connect a GUI tool like TablePlus
+      # or DBeaver directly to peek at the database.
       - "3307:3306"

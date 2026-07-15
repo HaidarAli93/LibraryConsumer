@@ -1,38 +1,42 @@
+# Base file - this is what you'd run in production (as-is, no override).
+# Locally, docker-compose.override.yaml automatically layers on top of
+# this when you run `docker compose up` - no extra flags needed.
+
 services:
+
   app:
     build:
       context: .
       dockerfile: dockerfile
-      target: app
-    container_name: library-consumer-app
-    restart: unless-stopped
     env_file:
       - .env
     depends_on:
       - mysql
     extra_hosts:
+      # Lets THIS container call back out to something running on your
+      # own computer (outside Docker) - e.g. another local project -
+      # by resolving this name to your host machine's address.
       - "library-owner.test:host-gateway"
     volumes:
+      # Shared with "web" below, so nginx can serve files this app
+      # writes (like user-uploaded images).
       - storage-app-public:/var/www/storage/app/public
 
   web:
-    build:
-      context: .
-      dockerfile: dockerfile
-      target: web
-    container_name: library-consumer-web
-    restart: unless-stopped
+    image: nginx:alpine
     ports:
       - "8000:80"
+    volumes:
+      - ./public:/var/www/public
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
+      # Same shared volume as "app" above - this is the other half of
+      # the connection that lets nginx actually see those files.
+      - storage-app-public:/var/www/public/storage
     depends_on:
       - app
-    volumes:
-      - storage-app-public:/var/www/public/storage
 
   mysql:
     image: mysql:8.4
-    container_name: library-mysql
-    restart: unless-stopped
     environment:
       MYSQL_DATABASE: ${DB_DATABASE}
       MYSQL_USER: ${DB_USERNAME}
@@ -41,6 +45,9 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
+      # Docker actively checks "is MySQL really ready to accept
+      # connections yet?" instead of just "did the process start?".
+      # Helps prevent "app" from trying to connect too early and failing.
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
       interval: 5s
       timeout: 5s
