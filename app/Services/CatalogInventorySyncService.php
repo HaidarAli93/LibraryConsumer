@@ -16,32 +16,28 @@ class CatalogInventorySyncService
 
     public function sync(): void
     {
-        $books = collect($this->api->getAllBooks());
+        $now = now();
 
-		$externalIds = [];
-		$now = now();
+        foreach ($this->api->getAllBooks() as $page) {
+            $rows = collect($page)->map(function ($book) use ($now) {
+                $book['external_id'] = $book['ID'];
+                unset($book['ID']);
 
-        $rows = $books->map(function ($book) use ($now) {
-            $book['external_id'] = $book['ID'];
-            unset($book['ID']);
+                $book['created_at'] = $now;
+                $book['updated_at'] = $now;
+                $book['synced_at'] = $now;
 
-            $book['created_at'] = $now;
-            $book['updated_at'] = $now;
-            $book['synced_at'] = $now;
+                return $book;
+            });
 
-            return $book;
-		});
+            $rows->chunk(self::UPSERT_CHUNK_SIZE)->each(function ($chunk) {
+                CatalogInventory::upsert(
+                    $chunk->toArray(),
+                    ['external_id']
+                );
+            });
+        }
 
-		DB::transaction(function () use ($rows, $now) {
-			$rows->chunk(self::UPSERT_CHUNK_SIZE)
-			->each(function ($chunk) {
-				CatalogInventory::upsert(
-					$chunk->toArray(),
-					['external_id']
-				);
-			});
-
-			CatalogInventory::where('synced_at', '<', $now)->delete();
-		});
-    }
+		CatalogInventory::where('synced_at', '<', $now)->delete();
+	}
 }

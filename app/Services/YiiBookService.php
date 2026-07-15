@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\RequestException;
+use Generator;
 
 class YiiBookService
 {
@@ -24,12 +25,23 @@ class YiiBookService
         ])->baseUrl($this->baseUrl);
     }
 
-    public function getAllBooks(array $filters = []): array
+    public function getAllBooks(array $filters = []): Generator
     {
-        return $this->client()
-			->get('/api/catalogs')
-            ->throw()
-            ->json();
+        $page = 1;
+
+        do {
+            $response = $this->client()
+                ->get('/api/catalogs', array_merge($filters, [
+                    'page' => $page,
+                    //'per-page' => $this->perPage,
+                ]))
+                ->throw();
+
+            yield $response->json();
+
+            $pageCount = (int) $response->header('X-Pagination-Page-Count');
+            $page++;
+        } while ($page <= $pageCount);
     }
 
     public function getBook(int $id): array
