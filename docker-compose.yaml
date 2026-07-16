@@ -16,7 +16,7 @@ services:
       # Lets THIS container call back out to something running on your
       # own computer (outside Docker) - e.g. another local project -
       # by resolving this name to your host machine's address.
-      - "library-owner.test:host-gateway"
+      - "inlislite3.test:host-gateway"
     volumes:
       # Shared with "web" below, so nginx can serve files this app
       # writes (like user-uploaded images).

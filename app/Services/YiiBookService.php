@@ -31,7 +31,7 @@ class YiiBookService
 
         do {
             $response = $this->client()
-                ->get('/api/catalogs', array_merge($filters, [
+                ->get('/v1/catalog', array_merge($filters, [
                     'page' => $page,
                     //'per-page' => $this->perPage,
                 ]))
@@ -47,7 +47,7 @@ class YiiBookService
     public function getBook(int $id): array
     {
         return $this->client()
-            ->get("/api/catalogs/{$id}")
+            ->get("/api/catalog/{$id}")
             ->throw()
             ->json();
     }
