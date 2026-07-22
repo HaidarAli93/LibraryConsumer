@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Login</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -82,9 +83,33 @@
     </style>
 </head>
 <body>
+	@if (session('toast'))
+		<div class="toast-container position-fixed top-0 end-0 p-3">
+			<div id="syncToast"
+				 class="toast fade text-bg-{{ session('toast.type') }}"
+				 role="alert"
+				 aria-live="assertive"
+				 aria-atomic="true">
+
+				<div class="d-flex">
+					<div class="toast-body">
+						{{ session('toast.message') }}
+					</div>
+
+					<button type="button"
+							class="btn-close btn-close-white me-2 m-auto"
+							data-bs-dismiss="toast"
+							aria-label="Close">
+					</button>
+				</div>
+
+			</div>
+		</div>
+	@endif
+
     <div class="login-container">
         <h2>Login</h2>
-        <form action="{{ route('dashboard.login') }}" method="POST">
+        <form action="{{ route('login') }}" method="POST">
             @csrf
             <div class="form-group">
                 <label for="email">Email address</label>
@@ -104,5 +129,23 @@
             <button type="submit" class="submit-button">Sign in</button>
         </form>
     </div>
+
+    <!-- Bootstrap JS & jQuery -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+	@if(session('toast'))
+		<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const toastElement = document.getElementById('syncToast');
+
+			const toast = new bootstrap.Toast(toastElement, {
+				autohide: true,
+				delay: 3000
+			});
+
+			toast.show();
+		});
+		</script>
+	@endif
 </body>
 </html>

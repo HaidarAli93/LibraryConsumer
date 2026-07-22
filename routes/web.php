@@ -16,10 +16,11 @@ Route::controller(CatalogController::class)->group(function () {
 	Route::get('/catalogs/{id}', 'show')->name('catalog.details');
 });
 
-Route::get('/admin/login', [AuthController::class, 'index'])->name('dashboard.login');
-Route::post('/admin/login', [AuthController::class, 'login'])->name('dashboard.login');
+Route::get('/admin/login', [AuthController::class, 'index'])->name('login');
+Route::post('/admin/login', [AuthController::class, 'login'])->name('login');
+Route::get('/admin/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::controller(DashboardController::class)->group(function () {
+Route::controller(DashboardController::class)->middleware('auth')->group(function () {
 	Route::get('/admin', 'index')->name('dashboard');
 	Route::post('/admin', 'sync')->name('dashboard.sync');
 });

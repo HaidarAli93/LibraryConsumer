@@ -60,7 +60,7 @@
     <div class="sidebar">
         <h3 class="text-center text-white">Dashboard</h3>
         <a href="{{ route('dashboard') }}">Home</a>
-        <a href="{{ route('dashboard.login') }}">Log Out</a>
+        <a href="{{ route('logout') }}">Log Out</a>
     </div>
 
     <div class="content">

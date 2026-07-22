@@ -26,7 +26,12 @@ class AuthController extends Controller
 
         if (!$user) {
             // Redirect to registration if the user doesn't exist
-            return redirect()->route('dashboard.login')->with('error', 'User not found.');
+			return redirect()
+				->route('login')
+				->with('toast', [
+					'type' => 'danger',
+					'message' => 'User not found.',
+				]);
         }
 
         // Attempt to log in the user
@@ -35,6 +40,19 @@ class AuthController extends Controller
         }
 
         // If login fails
-        return back()->withErrors(['email' => 'Invalid email or password']);
+        //return back()->withErrors(['email' => 'Invalid email or password']);
+		return back()->with('toast', [
+			'type' => 'danger',
+			'message' => 'Invalid email or password',
+		]);
     }
+
+	public function logout(Request $request)
+	{
+		Auth::logout();
+		$request->session()->invalidate();
+		$request->session()->regenerateToken();
+
+		return redirect()->route('login');
+	}
 }
