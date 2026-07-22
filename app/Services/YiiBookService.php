@@ -34,6 +34,7 @@ class YiiBookService
                 ->get('/v1/catalog', array_merge($filters, [
                     'page' => $page,
                     //'per-page' => $this->perPage,
+					'includeAll' => 1,
                 ]))
                 ->throw();
 
